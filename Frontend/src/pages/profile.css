@@ -1,0 +1,129 @@
+.profile-main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.profile-main h1 {
+  font-size: 28px;
+  color: #f3f4f6;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.profile-card {
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-card h2 {
+  font-size: 18px;
+  color: #c084fc;
+  margin-bottom: 16px;
+}
+
+.profile-field {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #e8e6ee;
+  border-bottom: 1px solid #241539;
+}
+
+.profile-field:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  color: #9ca3af;
+}
+
+.profile-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-card label {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c4bfd0;
+}
+
+.profile-card input {
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #e8e6ee;
+  background: #241539;
+  border: 1px solid #2e2445;
+  border-radius: 8px;
+  outline: none;
+}
+
+.profile-card input:focus {
+  border-color: #aa3bff;
+}
+
+.profile-card button {
+  margin-top: 16px;
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #aa3bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.profile-card button:hover:not(:disabled) {
+  background: #8f2bd8;
+}
+
+.profile-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-error,
+.profile-success {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.profile-error {
+  color: #f5c6c2;
+  background: #3b1f1c;
+  border: 1px solid #5c302b;
+}
+
+.profile-success {
+  color: #b7e4c7;
+  background: #1d3325;
+  border: 1px solid #2e5540;
+}
+
+.profile-logout {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5c6c2;
+  background: transparent;
+  border: 1px solid #5c302b;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.profile-logout:hover {
+  background: #3b1f1c;
+}

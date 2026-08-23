@@ -1,0 +1,164 @@
+.home-page {
+  min-height: 100svh;
+  background: #101018;
+  color: #e8e6ee;
+}
+
+/* ── Navbar ─────────────────────────────────────────────── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #1a1030;
+  border-bottom: 1px solid #2e2445;
+}
+
+.navbar-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #c084fc;
+  text-decoration: none;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-balance {
+  padding: 6px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #101018;
+  background: #f3e8ff;
+  border-radius: 999px;
+}
+
+.navbar-loan-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #2e8b57;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navbar-loan-btn:hover {
+  background: #247047;
+}
+
+.navbar-user {
+  position: relative;
+}
+
+.navbar-user-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #fff;
+  background: #aa3bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navbar-user-btn:hover {
+  background: #8f2bd8;
+}
+
+.navbar-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 170px;
+  background: #241539;
+  border: 1px solid #2e2445;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.navbar-menu a,
+.navbar-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #e8e6ee;
+  background: transparent;
+  border: none;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.navbar-menu a:hover,
+.navbar-menu button:hover {
+  background: #2e2445;
+}
+
+/* ── Grid de juegos ─────────────────────────────────────── */
+.home-main {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.home-main h1 {
+  font-size: 32px;
+  color: #f3f4f6;
+}
+
+.home-main p {
+  color: #9ca3af;
+}
+
+.game-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 160px;
+  height: 160px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 12px;
+  color: #e8e6ee;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.game-card:hover {
+  border-color: #aa3bff;
+  background: #241539;
+}
+
+.game-card-thumb {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.game-card-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.loading-screen {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #6b6375;
+}
