@@ -316,3 +316,87 @@ status (ENUM: pending, approved, rejected)
 - **Escalabilidad:** Modular para agregar juegos
 - **Logging:** Logs de errores y transacciones financieras
 - **Documentación:** Comentarios en código, README en repo
+
+---
+
+## 11. Instalación y Ejecución
+
+### 11.1 Prerrequisitos
+
+| Herramienta | Versión | Nota |
+|-------------|---------|------|
+| Docker + Docker Compose | cualquier reciente | Para la base de datos (PostgreSQL 13 en contenedor) |
+| Python | 3.9+ (probado con 3.13) | Backend |
+| Node.js + npm | cualquier reciente (probado con Vite 8) | Frontend |
+
+### 11.2 Base de datos (Docker)
+
+El proyecto incluye un `docker-compose.yml` con PostgreSQL 13. Para levantarla:
+
+```bash
+docker compose up -d
+```
+
+- Puerto: **5433** (evita conflicto con un PostgreSQL local en el 5432)
+- Usuario: `casino` · Contraseña: `casino_dev_password` · Base: `casino_db`
+
+Las tablas se crean automáticamente al arrancar el backend (no hace falta SQL manual).
+
+### 11.3 Configuración de variables de entorno
+
+Copia las plantillas a los archivos reales y ajusta si es necesario:
+
+```bash
+# Backend
+cp Backend/.env.example Backend/.env
+# Frontend
+cp Frontend/.env.example Frontend/.env
+```
+
+- `Backend/.env` → `DATABASE_URL` (apunta a la BD del paso 11.2) y `SECRET_KEY` (firma de JWT).
+- `Frontend/.env` → `VITE_API_URL=http://localhost:8000` (URL del backend).
+
+### 11.4 Backend (FastAPI)
+
+```bash
+cd Backend
+python -m venv LSV                # crear entorno virtual (opcional)
+LSV\Scripts\activate              # activarlo (Windows)
+python -m pip install -r requirements.txt
+python -m uvicorn main:app --reload
+```
+
+El servidor queda en `http://localhost:8000`. Documentación interactiva de la API en
+`http://localhost:8000/docs`.
+
+### 11.5 Frontend (React + Vite)
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+El servidor de desarrollo queda en `http://localhost:5173`.
+
+### 11.6 Tests
+
+```bash
+# Tests backend (desde la raíz del repo, requiere BD corriendo)
+Backend/LSV/Scripts/python.exe -m pytest Backend/tests -v
+```
+
+Los tests de backend usan la base real de desarrollo y la vacían entre pruebas.
+
+### 11.7 Comandos útiles
+
+| Acción | Comando |
+|--------|---------|
+| Levantar BD | `docker compose up -d` |
+| Detener BD | `docker compose down` |
+| Ver BD con pgAdmin | conectarse a `localhost:5433`, usuario `casino` |
+| Arrancar backend | `python -m uvicorn main:app --reload` (en `Backend/`) |
+| Correr tests backend | `pytest Backend/tests` (desde la raíz) |
+| Arrancar frontend | `npm run dev` (en `Frontend/`) |
+| Lint frontend | `npm run lint` (en `Frontend/`) |
+| Build frontend | `npm run build` (en `Frontend/`) |
