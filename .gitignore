@@ -1,9 +1,0 @@
-/Backend/__pycache__
-Backend/.env
-/Backend/app/__pycache__
-/Backend/app/models/__pycache__
-/Backend/app/routers/__pycache__
-/Backend/app/services/__pycache__
-/Backend/app/utils/__pycache__
-/Frontend/node_modules
-Frontend/.env
