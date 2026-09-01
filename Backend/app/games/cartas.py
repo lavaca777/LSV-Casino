@@ -29,11 +29,24 @@ class Baraja:
     def reset(self) -> None:
         self.cartas = [Carta(palo, rango) for palo in Palo for rango in RANGOS] * self.num_decks
         self.rng.shuffle(self.cartas)
-        
+
+    def shuffle(self) -> None:
+        self.rng.shuffle(self.cartas)
+
     def repartir_carta(self) -> Carta:
-                if len(self.cartas) < 1:
+        if len(self.cartas) < 1:
             self.reset()
-        dealt = self.cartas[:n]
+        carta = self.cartas[0]
+        self.cartas = self.cartas[1:]
+        return carta
+
+    def repartir_cartas(self, n: int) -> list[Carta]:
+        """Reparte n cartas de una vez (p.ej. la mano inicial de un bot)."""
+        if len(self.cartas) < n:
+            self.reset()
+        cartas = self.cartas[:n]
         self.cartas = self.cartas[n:]
-        return dealt
-    
+        return cartas
+
+    def restantes(self) -> int:
+        return len(self.cartas)

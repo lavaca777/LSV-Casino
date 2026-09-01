@@ -7,7 +7,6 @@ from sqlalchemy import text
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_DIR))
-
 from main import app  # noqa: E402
 from app.database import engine, init_db  # noqa: E402
 from app.utils.rate_limiter import login_rate_limiter  # noqa: E402
