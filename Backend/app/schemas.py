@@ -78,3 +78,29 @@ class WalletResponse(BaseModel):
 
     balance: float
     total_wagered: float
+
+
+class LoanResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    amount: float
+    requested_at: datetime
+
+
+class LoanRequestResponse(BaseModel):
+    new_balance: float
+    loan_amount: float
+
+
+class WithdrawalRequest(BaseModel):
+    amount: float = Field(gt=0)
+
+
+class WithdrawalResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    amount: float
+    requested_at: datetime
+    status: str

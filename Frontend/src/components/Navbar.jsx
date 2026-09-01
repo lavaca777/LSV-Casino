@@ -3,19 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import { useWallet } from '../hooks/useWallet'
-
-const LOAN_THRESHOLD = 20
+import LoanRequestButton from './LoanRequestButton'
 
 function Navbar() {
   const { user, logout } = useAuth()
-  const { balance, refresh } = useWallet()
+  const { balance } = useWallet()
   const [menuOpen, setMenuOpen] = useState(false)
   const dropdownRef = useRef(null)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -40,11 +35,7 @@ function Navbar() {
       <div className="navbar-right">
         <div className="navbar-balance">${Number(balance).toFixed(2)}</div>
 
-        {balance < LOAN_THRESHOLD && (
-          <button type="button" className="navbar-loan-btn" title="Pedir préstamo ($20)">
-            Pedir préstamo
-          </button>
-        )}
+        <LoanRequestButton />
 
         <div className="navbar-user" ref={dropdownRef}>
           <button

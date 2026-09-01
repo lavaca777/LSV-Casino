@@ -12,8 +12,8 @@
 Desarrollo de un **casino virtual ficticio** donde los usuarios pueden jugar blackjack sin dinero real. El sistema está diseñado para ser **modular y escalable**, permitiendo agregar más juegos en el futuro sin modificar la arquitectura base.
 
 ### Diferenciador principal
-- **Sin login**: Dinero ilimitado, juego para probar, sin persistencia
-- **Con login**: Sistema de préstamos diarios ($20 x3/día), registro permanente con historial completo
+- **Sin login** *(diferido al final del proyecto)*: Dinero ilimitado, juego para probar, sin persistencia
+- **Con login**: Sistema de préstamos de $20, registro permanente con historial completo
 
 ---
 
@@ -105,7 +105,7 @@ games/
 
 ### 4.4 Wallet Service
 - Gestión de dinero de usuario
-- Sistema de préstamos ($20 x3/día, se resetea diariamente)
+- Sistema de préstamos de $20 (sin límite diario por ahora; los límites quedan como opcional al final)
 - Validación de apuestas mínimas/máximas
 - Registro de retiros (solo lógica, no dinero real)
 
@@ -121,7 +121,7 @@ games/
 
 ## 5. Flujo de Usuario
 
-### 5.1 Usuario SIN LOGIN
+### 5.1 Usuario SIN LOGIN *(diferido al final del proyecto)*
 1. Entra a la página principal
 2. Ve grid de juegos
 3. Hace clic en Blackjack
@@ -132,7 +132,7 @@ games/
 1. **Registro**: Crea cuenta (email, username, contraseña)
 2. **Login**: Entra con credenciales
 3. **Dashboard**: Ve saldo actual, botón de préstamo visible
-4. **Pedir préstamo**: Si dinero < X, puede pedir $20 (máx 3/día)
+4. **Pedir préstamo**: Puede pedir préstamos de $20 (sin límite diario por ahora)
 5. **Juega**: Apuesta entre $5 y su saldo disponible
 6. **Historial**: Todas las partidas se registran con resultado y balance
 7. **Perfil**: Ve sus datos, puede cambiar contraseña
@@ -192,7 +192,6 @@ id (PK)
 user_id (FK → users)
 amount (DECIMAL, default 20)
 requested_at
-reset_date (fecha del próximo reset diario)
 ```
 
 #### games
@@ -208,14 +207,14 @@ created_at
 #### game_sessions
 ```sql
 id (PK)
-user_id (FK → users, nullable si es sin login)
+user_id (FK → users, nullable si es sin login — *diferido al final*)
 game_id (FK → games)
 bet (DECIMAL)
 started_at
 ended_at
 result (ENUM: win, loss, draw)
 payout (DECIMAL)
-session_token (para usuarios sin login)
+session_token (para usuarios sin login — *diferido al final*)
 ```
 
 #### game_results
@@ -288,7 +287,7 @@ status (ENUM: pending, approved, rejected)
 
 ### 9.3 Wallet & Dinero
 - [ ] Crear wallet al registrarse
-- [ ] Lógica de préstamos ($20 x3/día, reset diario)
+- [ ] Lógica de préstamos de $20 (sin límite diario por ahora)
 - [ ] Validación de apuesta (min $5, max saldo)
 - [ ] Actualización de balance tras cada partida
 - [ ] Registro de retiros (sin procesar dinero)

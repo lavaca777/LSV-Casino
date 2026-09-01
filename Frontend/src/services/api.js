@@ -42,6 +42,26 @@ export const walletService = {
     const { data } = await api.get(`/users/${userId}/wallet`)
     return data
   },
+
+  async requestLoan(userId) {
+    const { data } = await api.post(`/users/${userId}/loans/request`)
+    return data
+  },
+
+  async getLoansHistory(userId) {
+    const { data } = await api.get(`/users/${userId}/loans/history`)
+    return data
+  },
+
+  async requestWithdrawal(userId, amount) {
+    const { data } = await api.post(`/users/${userId}/withdrawals/request`, { amount })
+    return data
+  },
+
+  async getWithdrawals(userId) {
+    const { data } = await api.get(`/users/${userId}/withdrawals`)
+    return data
+  },
 }
 
 export const userService = {

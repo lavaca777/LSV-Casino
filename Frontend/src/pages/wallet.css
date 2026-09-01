@@ -1,0 +1,144 @@
+.wallet-main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.wallet-main h1 {
+  font-size: 28px;
+  color: #f3f4f6;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.wallet-balance-card {
+  text-align: center;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 12px;
+  padding: 28px 20px;
+  margin-bottom: 20px;
+}
+
+.wallet-balance-amount {
+  font-size: 40px;
+  font-weight: 700;
+  color: #c084fc;
+}
+
+.wallet-balance-label {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.wallet-total-wagered {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #c4bfd0;
+}
+
+.wallet-card {
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.wallet-card h2 {
+  font-size: 18px;
+  color: #c084fc;
+  margin-bottom: 16px;
+}
+
+.wallet-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wallet-card input {
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #e8e6ee;
+  background: #241539;
+  border: 1px solid #2e2445;
+  border-radius: 8px;
+  outline: none;
+}
+
+.wallet-card input:focus {
+  border-color: #aa3bff;
+}
+
+.wallet-card form button {
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #aa3bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wallet-card form button:hover:not(:disabled) {
+  background: #8f2bd8;
+}
+
+.wallet-card form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wallet-error,
+.wallet-success {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.wallet-error {
+  color: #f5c6c2;
+  background: #3b1f1c;
+  border: 1px solid #5c302b;
+}
+
+.wallet-success {
+  color: #b7e4c7;
+  background: #1d3325;
+  border: 1px solid #2e5540;
+}
+
+.wallet-empty {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.wallet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #e8e6ee;
+}
+
+.wallet-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ca3af;
+  border-bottom: 1px solid #2e2445;
+}
+
+.wallet-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #241539;
+}
+
+.wallet-table tr:last-child td {
+  border-bottom: none;
+}

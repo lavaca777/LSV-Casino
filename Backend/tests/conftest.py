@@ -9,16 +9,21 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_DIR))
 
 from main import app  # noqa: E402
-from app.database import engine  # noqa: E402
+from app.database import engine, init_db  # noqa: E402
 from app.utils.rate_limiter import login_rate_limiter  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
 def clean_db():
-    """Vacía las tablas antes de cada test y resetea el rate limiter."""
+    """Crea las tablas (si no existen), vacía los datos y resetea el rate limiter."""
+    init_db()
     login_rate_limiter.reset()
     with engine.connect() as conn:
-        conn.execute(text("TRUNCATE TABLE wallets, users RESTART IDENTITY CASCADE"))
+        conn.execute(
+            text(
+                "TRUNCATE TABLE withdrawals, loans, wallets, users RESTART IDENTITY CASCADE"
+            )
+        )
         conn.commit()
     yield
 
