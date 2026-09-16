@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { getErrorMessage } from '../services/api'
+
 function LoanModal({ amount, onConfirm, onClose }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
@@ -11,7 +13,7 @@ function LoanModal({ amount, onConfirm, onClose }) {
       await onConfirm()
       onClose()
     } catch (err) {
-      setError(err?.response?.data?.detail || 'No se pudo procesar el préstamo')
+      setError(getErrorMessage(err, 'No se pudo procesar el préstamo'))
     } finally {
       setSubmitting(false)
     }

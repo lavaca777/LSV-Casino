@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 
-from games.cartas import Baraja, Carta
+from app.games.blackjack.cartas import Baraja, Carta
 
 
 def valor_mano(mano: list[Carta]) -> int:

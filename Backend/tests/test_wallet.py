@@ -1,7 +1,7 @@
 import psycopg2
 
 from app.config import settings
-from tests.conftest import register_user
+from tests.conftest import register_user, set_balance
 
 
 def _register_and_login(client):
@@ -59,17 +59,23 @@ def test_request_loan_adds_20(client):
     assert resp.json()["balance"] == 20
 
 
-def test_request_loan_no_daily_limit(client):
+def test_request_loan_only_when_balance_below_5(client):
     user_id, headers = _register_and_login(client)
-    for i in range(1, 6):  # 5 préstamos seguidos (antes el límite era 3/día)
-        resp = client.post(f"/users/{user_id}/loans/request", headers=headers)
-        assert resp.status_code == 200
-        assert resp.json()["new_balance"] == 20 * i
+
+    # con saldo 0 puede pedir el préstamo
+    resp = client.post(f"/users/{user_id}/loans/request", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["new_balance"] == 20
+
+    # con saldo 20 ya no puede volver a pedir
+    resp = client.post(f"/users/{user_id}/loans/request", headers=headers)
+    assert resp.status_code == 400
 
 
 def test_loans_history(client):
     user_id, headers = _register_and_login(client)
     client.post(f"/users/{user_id}/loans/request", headers=headers)
+    set_balance(user_id, 0)  # gastar para poder pedir otro
     client.post(f"/users/{user_id}/loans/request", headers=headers)
 
     resp = client.get(f"/users/{user_id}/loans/history", headers=headers)
@@ -83,10 +89,7 @@ def test_loans_history(client):
 
 def test_withdrawal_request(client):
     user_id, headers = _register_and_login(client)
-    # darse saldo: pedir préstamos
-    client.post(f"/users/{user_id}/loans/request", headers=headers)
-    client.post(f"/users/{user_id}/loans/request", headers=headers)
-    client.post(f"/users/{user_id}/loans/request", headers=headers)
+    set_balance(user_id, 60)
 
     resp = client.post(
         f"/users/{user_id}/withdrawals/request",
@@ -125,9 +128,7 @@ def test_withdrawal_request_invalid_amount(client):
 
 def test_withdrawals_history(client):
     user_id, headers = _register_and_login(client)
-    # dar saldo: préstamos ($20 cada uno)
-    for _ in range(3):
-        client.post(f"/users/{user_id}/loans/request", headers=headers)
+    set_balance(user_id, 60)
     client.post(f"/users/{user_id}/withdrawals/request", json={"amount": 10}, headers=headers)
     client.post(f"/users/{user_id}/withdrawals/request", json={"amount": 20}, headers=headers)
 

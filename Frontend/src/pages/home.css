@@ -1,7 +1,16 @@
 .home-page {
   min-height: 100svh;
+  display: flex;
+  flex-direction: column;
   background: #101018;
   color: #e8e6ee;
+}
+
+/* El contenido crece y ocupa como mínimo una pantalla completa, así el
+   footer queda al final y aparece al hacer scroll (no a media pantalla). */
+.home-page > main {
+  flex: 1 0 auto;
+  min-height: 100svh;
 }
 
 /* ── Navbar ─────────────────────────────────────────────── */

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../hooks/useAuth'
 import { useWallet } from '../hooks/useWallet'
-import { walletService } from '../services/api'
+import { getErrorMessage, walletService } from '../services/api'
 import './home.css'
 import './wallet.css'
 
@@ -61,14 +62,21 @@ function WalletPage() {
     e.preventDefault()
     setError(null)
     setMessage(null)
+
+    const amount = Number(withdrawalAmount)
+    if (!withdrawalAmount || !Number.isFinite(amount) || amount <= 0) {
+      setError('Ingresa un monto válido para retirar')
+      return
+    }
+
     setSubmitting(true)
     try {
-      await walletService.requestWithdrawal(user.id, Number(withdrawalAmount))
+      await walletService.requestWithdrawal(user.id, amount)
       setWithdrawalAmount('')
       setMessage('Retiro aprobado')
       await Promise.all([refresh(), reloadHistory()])
     } catch (err) {
-      setError(err?.response?.data?.detail || 'No se pudo solicitar el retiro')
+      setError(getErrorMessage(err, 'No se pudo solicitar el retiro'))
     } finally {
       setSubmitting(false)
     }
@@ -159,6 +167,7 @@ function WalletPage() {
           )}
         </section>
       </main>
+      <Footer />
     </div>
   )
 }

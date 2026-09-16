@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
+import { getErrorMessage } from '../services/api'
 import './auth.css'
 
 function LoginPage() {
@@ -20,8 +21,7 @@ function LoginPage() {
       await login(identifier, password)
       navigate('/home')
     } catch (err) {
-      const detail = err?.response?.data?.detail
-      setError(detail || 'No se pudo iniciar sesión. Intenta de nuevo.')
+      setError(getErrorMessage(err, 'No se pudo iniciar sesión. Intenta de nuevo.'))
     } finally {
       setSubmitting(false)
     }

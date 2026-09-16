@@ -1,3 +1,4 @@
+import Footer from '../components/Footer'
 import GameGrid from '../components/GameGrid'
 import Navbar from '../components/Navbar'
 import './home.css'
@@ -11,6 +12,7 @@ function HomePage() {
         <p>Elige un juego para empezar</p>
         <GameGrid />
       </main>
+      <Footer />
     </div>
   )
 }

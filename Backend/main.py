@@ -3,13 +3,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import init_db
-from app.routers import auth, users, wallet
+from app.database import SessionLocal, init_db
+from app.routers import auth, games, users, wallet
+from app.utils.seed import seed_games
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    # Carga los juegos disponibles (ej. blackjack) en el catálogo.
+    with SessionLocal() as db:
+        seed_games(db)
     yield
 
 
@@ -32,6 +36,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(wallet.router)
+app.include_router(games.router)
 
 
 @app.get("/")

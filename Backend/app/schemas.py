@@ -104,3 +104,37 @@ class WithdrawalResponse(BaseModel):
     amount: float
     requested_at: datetime
     status: str
+
+
+class GameResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    min_bet: float
+    max_bet: float
+    house_edge: float
+
+
+class CoinflipPlayRequest(BaseModel):
+    bet: float = Field(gt=0)
+    eleccion: str
+
+    @field_validator("eleccion")
+    @classmethod
+    def validate_eleccion(cls, value: str) -> str:
+        value = value.strip().lower()
+        if value not in ("cara", "cruz"):
+            raise ValueError("eleccion must be 'cara' or 'cruz'")
+        return value
+
+
+class CoinflipPlayResponse(BaseModel):
+    resultado: str
+    eleccion: str
+    moneda: str
+    bet: float
+    payout: float
+    nuevo_balance: float
+
+

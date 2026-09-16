@@ -4,8 +4,8 @@ tests/test_blackjack.py
 
 import random
 
-from games.cartas import Carta, Palo
-from games.blackjack import (
+from app.games.blackjack.cartas import Carta, Palo
+from app.games.blackjack.blackjack import (
     desicion_bot,
     es_blackjack_natural,
     es_busted,

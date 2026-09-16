@@ -1,0 +1,132 @@
+.site-footer {
+  margin-top: 40px;
+  padding: 32px 24px 20px;
+  background: #0c0a12;
+  border-top: 1px solid #2e2445;
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: left;
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-brand {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.footer-logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #c084fc;
+}
+
+.footer-tagline {
+  margin-top: 10px;
+  max-width: 260px;
+  line-height: 1.5;
+  color: #8b8798;
+}
+
+.footer-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  flex: 2 1 600px;
+  justify-content: space-between;
+}
+
+.footer-col h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #e8e6ee;
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-col a {
+  color: #9ca3af;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.footer-col a:hover {
+  color: #c084fc;
+  text-decoration: underline;
+}
+
+.footer-responsible {
+  max-width: 1100px;
+  margin: 28px auto 0;
+  padding: 16px 18px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-left: 3px solid #aa3bff;
+  border-radius: 8px;
+}
+
+.footer-responsible h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #f3f4f6;
+}
+
+.footer-responsible p {
+  line-height: 1.6;
+  color: #b9b4c4;
+}
+
+.footer-responsible strong {
+  color: #e8e6ee;
+}
+
+.footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  max-width: 1100px;
+  margin: 24px auto 0;
+}
+
+.footer-badge {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #c4bfd0;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 999px;
+}
+
+.footer-bottom {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid #241539;
+  text-align: center;
+  font-size: 12px;
+  color: #6b6375;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-bottom em {
+  color: #8b8798;
+}

@@ -4,7 +4,7 @@ tests/test_baraja.py
 
 import random
 
-from games.cartas import Baraja, Carta, Palo
+from app.games.blackjack.cartas import Baraja, Carta, Palo
 
 
 def test_baraja_tiene_52_cartas():

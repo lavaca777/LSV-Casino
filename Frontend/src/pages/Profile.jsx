@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../hooks/useAuth'
-import { userService } from '../services/api'
+import { getErrorMessage, userService } from '../services/api'
 import './home.css'
 import './profile.css'
 
@@ -44,7 +45,7 @@ function ProfilePage() {
       setConfirmPassword('')
       setMessage('Contraseña actualizada correctamente')
     } catch (err) {
-      setError(err?.response?.data?.detail || 'No se pudo cambiar la contraseña')
+      setError(getErrorMessage(err, 'No se pudo cambiar la contraseña'))
     } finally {
       setSubmitting(false)
     }
@@ -123,6 +124,7 @@ function ProfilePage() {
           Cerrar sesión
         </button>
       </main>
+      <Footer />
     </div>
   )
 }

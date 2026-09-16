@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
+import { getErrorMessage } from '../services/api'
 import './auth.css'
 
 function RegisterPage() {
@@ -28,12 +29,7 @@ function RegisterPage() {
       await register({ email, username, password })
       navigate('/home')
     } catch (err) {
-      const detail = err?.response?.data?.detail
-      if (Array.isArray(detail)) {
-        setError(detail[0]?.msg || 'Datos inválidos')
-      } else {
-        setError(detail || 'No se pudo crear la cuenta. Intenta de nuevo.')
-      }
+      setError(getErrorMessage(err, 'No se pudo crear la cuenta. Intenta de nuevo.'))
     } finally {
       setSubmitting(false)
     }

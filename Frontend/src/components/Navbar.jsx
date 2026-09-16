@@ -5,6 +5,9 @@ import { useAuth } from '../hooks/useAuth'
 import { useWallet } from '../hooks/useWallet'
 import LoanRequestButton from './LoanRequestButton'
 
+// Solo se muestra el botón de préstamo si el saldo está por debajo de este monto.
+const LOAN_THRESHOLD = 5
+
 function Navbar() {
   const { user, logout } = useAuth()
   const { balance } = useWallet()
@@ -35,7 +38,7 @@ function Navbar() {
       <div className="navbar-right">
         <div className="navbar-balance">${Number(balance).toFixed(2)}</div>
 
-        <LoanRequestButton />
+        {balance < LOAN_THRESHOLD && <LoanRequestButton />}
 
         <div className="navbar-user" ref={dropdownRef}>
           <button

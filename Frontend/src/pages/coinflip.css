@@ -1,0 +1,133 @@
+.coinflip-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.coinflip-main h1 {
+  font-size: 28px;
+  color: #f3f4f6;
+}
+
+.coinflip-balance {
+  margin: 8px 0 24px;
+  font-size: 15px;
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.coinflip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+}
+
+.coinflip-card label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c4bfd0;
+}
+
+.coinflip-choices {
+  display: flex;
+  gap: 12px;
+}
+
+.coinflip-choice {
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #c4bfd0;
+  background: #241539;
+  border: 2px solid #2e2445;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.coinflip-choice.active {
+  color: #fff;
+  border-color: #aa3bff;
+  background: #2e2445;
+}
+
+.coinflip-card input {
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #e8e6ee;
+  background: #241539;
+  border: 1px solid #2e2445;
+  border-radius: 8px;
+  outline: none;
+}
+
+.coinflip-card input:focus {
+  border-color: #aa3bff;
+}
+
+.coinflip-play {
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #aa3bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.coinflip-play:hover:not(:disabled) {
+  background: #8f2bd8;
+}
+
+.coinflip-play:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.coinflip-error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #f5c6c2;
+  background: #3b1f1c;
+  border: 1px solid #5c302b;
+  border-radius: 8px;
+}
+
+.coinflip-result {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+}
+
+.coinflip-result.win {
+  border-color: #2e5540;
+  background: #1d3325;
+}
+
+.coinflip-result.loss {
+  border-color: #5c302b;
+  background: #3b1f1c;
+}
+
+.coinflip-coin {
+  font-size: 15px;
+  color: #e8e6ee;
+}
+
+.coinflip-outcome {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 8px 0;
+  color: #f3f4f6;
+}
