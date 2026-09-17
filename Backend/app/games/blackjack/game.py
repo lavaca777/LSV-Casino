@@ -45,7 +45,7 @@ class BlackjackGame(BaseGame):
         """Ventaja de la casa (referencia informativa)."""
         return float(self.house_edge)
 
-    def play(self, user_id, bet: Decimal, **opciones) -> dict:
+    def play(self, user_id, bet: Decimal, baraja: Baraja | None = None, **opciones) -> dict:
         """Ejecuta una ronda completa y devuelve el resultado.
 
         Reparte las cartas, juega los bots y resuelve el ganador usando las
@@ -64,25 +64,33 @@ class BlackjackGame(BaseGame):
 
         Por ahora solo devuelve las manos y el resultado, sin tocar dinero.
         """
-        baraja = Baraja()
+        baraja = baraja or Baraja()
         mano_jugador = baraja.repartir_cartas(2)
-
         ronda = jugar_ronda(mano_jugador, baraja, num_bots=2)
-        mano_final = ronda["mano_jugador"]
         manos_bots = ronda["manos_bots"]
-
-        resultado = resolver_ganador(mano_final, manos_bots)
-
+ 
+        resultado = None
+        turn = "player"
+        if es_blackjack_natural(mano_jugador):
+            resultado = resolver_ganador(mano_jugador, manos_bots)
+            turn = "done"
+ 
         return {
-            "user_id": user_id,
-            "bet": float(bet),
-            "mano_jugador": [_carta_a_dict(c) for c in mano_final],
-            "manos_bots": [[_carta_a_dict(c) for c in mano] for mano in manos_bots],
-            "total_jugador": valor_mano(mano_final),
+            "mano_jugador": mano_jugador,
+            "manos_bots": manos_bots,
+            "baraja": baraja,
+            "turn": turn,
             "resultado": resultado,
-            "jugador_blackjack": es_blackjack_natural(mano_final),
-            "jugador_pasado": es_busted(mano_final),
-            # Payout y balance se completan en el servicio de juego.
-            "payout": None,
-            "nuevo_balance": None,
         }
+
+    def hit(self, mano_jugador: list[Carta], baraja: Baraja) -> dict:
+        # El jugador pide una carta. Si se pasa, la ronda termina en derrota.
+        mano_jugador.append(baraja.repartir_carta())
+        if es_busted(mano_jugador):
+            return {"mano_jugador": mano_jugador, "turn": "done", "resultado": "loss"}
+        return {"mano_jugador": mano_jugador, "turn": "player", "resultado": None}
+ 
+    def stand(self, mano_jugador: list[Carta], manos_bots: list[list[Carta]]) -> dict:
+        # El jugador se planta: se resuelve el resultado final.
+        resultado = resolver_ganador(mano_jugador, manos_bots)
+        return {"mano_jugador": mano_jugador, "turn": "done", "resultado": resultado}
