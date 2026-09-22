@@ -138,3 +138,28 @@ class CoinflipPlayResponse(BaseModel):
     nuevo_balance: float
 
 
+class BlackjackStartRequest(BaseModel):
+    bet: float = Field(gt=0)
+
+
+class BlackjackCard(BaseModel):
+    palo: str
+    rango: str
+
+
+class BlackjackPlayResponse(BaseModel):
+    """Respuesta compartida por start/hit/stand.
+
+    Como blackjack se juega en varios pasos, no todos los campos vienen
+    siempre: mientras la ronda sigue abierta (turn="player"), solo hay
+    session_id/mano_jugador/turn; al terminar (turn="done") ya vienen
+    manos_bots, resultado, payout y nuevo_balance.
+    """
+
+    session_id: str | None = None
+    mano_jugador: list[BlackjackCard]
+    manos_bots: list[list[BlackjackCard]] | None = None
+    turn: str
+    resultado: str | None = None
+    payout: float | None = None
+    nuevo_balance: float | None = None
