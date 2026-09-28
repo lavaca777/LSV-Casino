@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext'
 import { WalletProvider } from './context/WalletContext'
 import ComingSoon from './pages/ComingSoon'
 import CoinflipPage from './pages/Coinflip'
+import BlackjackPage from './pages/BlackjackPage'
 import HomePage from './pages/Home'
 import LoginPage from './pages/Login'
 import ProfilePage from './pages/Profile'
@@ -72,7 +73,7 @@ function App() {
               path="/blackjack"
               element={
                 <ProtectedRoute>
-                  <ComingSoon title="Blackjack" />
+                  <BlackjackPage />
                 </ProtectedRoute>
               }
             />

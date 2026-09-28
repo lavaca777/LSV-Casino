@@ -1,5 +1,13 @@
 """Clase BlackjackGame: adapta la lógica existente de `blackjack.py` a la
 interfaz `BaseGame`.
+
+A diferencia de un juego de una sola tirada (coinflip), blackjack se
+juega en varios pasos: play() inicia la ronda (reparte y resuelve a los
+bots, que no esperan input humano), pero el resultado final depende de
+las decisiones del jugador -- así que se agregan hit()/stand() además
+del contrato mínimo de BaseGame. Blackjack natural (21 con las primeras
+2 cartas) se resuelve directo en play(), porque no tiene sentido pedir
+más cartas con 21.
 """
 
 from decimal import Decimal
@@ -15,8 +23,8 @@ from app.games.blackjack.blackjack import (
 from app.games.blackjack.cartas import Baraja, Carta
 
 
-def _carta_a_dict(carta: Carta) -> dict:
-    """Convierte una Carta a un dict serializable (para respuestas JSON)."""
+def carta_a_dict(carta: Carta) -> dict:
+    """Convierte una Carta a un dict serializable (para JSONB/respuestas JSON)."""
     return {"palo": carta.palo.value, "rango": carta.rango}
 
 
@@ -29,7 +37,6 @@ class BlackjackGame(BaseGame):
     house_edge = Decimal("0.02")
 
     def get_rules(self) -> dict:
-        """Reglas del juego (texto para mostrar al usuario)."""
         return {
             "nombre": "Blackjack",
             "descripcion": (
@@ -42,39 +49,33 @@ class BlackjackGame(BaseGame):
         }
 
     def get_house_edge(self) -> float:
-        """Ventaja de la casa (referencia informativa)."""
         return float(self.house_edge)
 
     def play(self, user_id, bet: Decimal, baraja: Baraja | None = None, **opciones) -> dict:
-        """Ejecuta una ronda completa y devuelve el resultado.
+        """Inicia una ronda: reparte la mano del jugador y resuelve los
+        bots. Si el jugador saca blackjack natural, la ronda se resuelve
+        aquí mismo; si no, devuelve turn="player" para que hit()/stand()
+        sigan el juego.
 
-        Reparte las cartas, juega los bots y resuelve el ganador usando las
-        funciones de `blackjack.py`. El parámetro `**opciones` se acepta por
-        compatibilidad con BaseGame pero este juego no lo usa.
+        `baraja` es inyectable para tests deterministas; en producción
+        se deja en None y se crea una baraja real.
 
-        PENDIENTE (para el servicio de juego):
-        - TODO(payout): calcular el pago según el resultado
-          (win = bet * 2, draw = bet, loss = 0).
-        - TODO(wallet): actualizar el balance del usuario con el payout
-          (usar `wallet_service.update_balance`).
-        - TODO(persistencia): guardar la `GameSession` y el `GameResult`
-          en la base de datos.
-        - TODO(blackjack natural): definir si el blackjack natural (21 con 2
-          cartas) paga distinto.
-
-        Por ahora solo devuelve las manos y el resultado, sin tocar dinero.
+        Devuelve, además de los datos serializables, "baraja" (el
+        objeto vivo, para que hit() lo siga usando) -- es
+        responsabilidad del llamador (el service) no exponer eso en
+        una respuesta HTTP.
         """
         baraja = baraja or Baraja()
         mano_jugador = baraja.repartir_cartas(2)
         ronda = jugar_ronda(mano_jugador, baraja, num_bots=2)
         manos_bots = ronda["manos_bots"]
- 
+
         resultado = None
         turn = "player"
         if es_blackjack_natural(mano_jugador):
             resultado = resolver_ganador(mano_jugador, manos_bots)
             turn = "done"
- 
+
         return {
             "mano_jugador": mano_jugador,
             "manos_bots": manos_bots,
@@ -84,13 +85,13 @@ class BlackjackGame(BaseGame):
         }
 
     def hit(self, mano_jugador: list[Carta], baraja: Baraja) -> dict:
-        # El jugador pide una carta. Si se pasa, la ronda termina en derrota.
+        """El jugador pide una carta. Si se pasa, la ronda termina en derrota."""
         mano_jugador.append(baraja.repartir_carta())
         if es_busted(mano_jugador):
             return {"mano_jugador": mano_jugador, "turn": "done", "resultado": "loss"}
         return {"mano_jugador": mano_jugador, "turn": "player", "resultado": None}
- 
+
     def stand(self, mano_jugador: list[Carta], manos_bots: list[list[Carta]]) -> dict:
-        # El jugador se planta: se resuelve el resultado final.
+        """El jugador se planta: se resuelve el resultado final."""
         resultado = resolver_ganador(mano_jugador, manos_bots)
         return {"mano_jugador": mano_jugador, "turn": "done", "resultado": resultado}

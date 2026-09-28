@@ -1,0 +1,127 @@
+.bj-main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.bj-main h1 {
+  font-size: 28px;
+  color: #f3f4f6;
+}
+
+.bj-balance {
+  margin: 8px 0 24px;
+  font-size: 15px;
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.bj-bet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 280px;
+  margin: 0 auto 20px;
+  text-align: left;
+}
+
+.bj-bet-form input {
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #e8e6ee;
+  background: #241539;
+  border: 1px solid #2e2445;
+  border-radius: 8px;
+}
+
+.bj-bet-form button,
+.bj-actions button,
+.bj-result button {
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #aa3bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.bj-bet-form button:disabled,
+.bj-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bj-error {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #f5c6c2;
+  background: #3b1f1c;
+  border: 1px solid #5c302b;
+  border-radius: 8px;
+}
+
+.bj-table {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bj-hand {
+  padding: 12px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+  border-radius: 10px;
+}
+
+.bj-hand h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #c4bfd0;
+}
+
+.bj-cards {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bj-card {
+  padding: 6px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #101018;
+  background: #f3e8ff;
+  border-radius: 6px;
+}
+
+.bj-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.bj-result {
+  padding: 16px;
+  border-radius: 10px;
+  background: #1a1030;
+  border: 1px solid #2e2445;
+}
+
+.bj-result-win {
+  border-color: #2e5540;
+  background: #1d3325;
+}
+
+.bj-result-loss {
+  border-color: #5c302b;
+  background: #3b1f1c;
+}
+
+.bj-result button {
+  margin-top: 10px;
+}

@@ -47,7 +47,11 @@ def play_coinflip(
     )
 
 
-@router.post("/blackjack/start", response_model=BlackjackPlayResponse)
+@router.post(
+    "/blackjack/start",
+    response_model=BlackjackPlayResponse,
+    response_model_exclude_none=True,
+)
 def start_blackjack(
     payload: BlackjackStartRequest,
     current_user: CurrentUser,
@@ -58,9 +62,13 @@ def start_blackjack(
     return blackjack_service.start_round(
         db, current_user.id, Decimal(str(payload.bet))
     )
-
-
-@router.post("/blackjack/{session_id}/hit", response_model=BlackjackPlayResponse)
+ 
+ 
+@router.post(
+    "/blackjack/{session_id}/hit",
+    response_model=BlackjackPlayResponse,
+    response_model_exclude_none=True,
+)
 def hit_blackjack(
     session_id: UUID,
     current_user: CurrentUser,
@@ -68,9 +76,13 @@ def hit_blackjack(
 ) -> dict:
     """El jugador pide una carta en una ronda abierta."""
     return blackjack_service.hit(db, current_user.id, session_id)
-
-
-@router.post("/blackjack/{session_id}/stand", response_model=BlackjackPlayResponse)
+ 
+ 
+@router.post(
+    "/blackjack/{session_id}/stand",
+    response_model=BlackjackPlayResponse,
+    response_model_exclude_none=True,
+)
 def stand_blackjack(
     session_id: UUID,
     current_user: CurrentUser,

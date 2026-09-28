@@ -89,6 +89,21 @@ export const gameService = {
     const { data } = await api.post('/games/coinflip/play', { bet, eleccion })
     return data
   },
+
+  async startBlackjack(bet) {
+    const { data } = await api.post('/games/blackjack/start', { bet })
+    return data
+  },
+
+  async hitBlackjack(sessionId) {
+    const { data } = await api.post(`/games/blackjack/${sessionId}/hit`)
+    return data
+  },
+
+  async standBlackjack(sessionId) {
+    const { data } = await api.post(`/games/blackjack/${sessionId}/stand`)
+    return data
+  },
 }
 
 export function saveAuth(token, userId) {
@@ -109,13 +124,6 @@ export function getStoredUserId() {
   return localStorage.getItem(USER_ID_KEY)
 }
 
-/**
- * Extrae un mensaje de error legible de una respuesta de axios.
- *
- * El backend devuelve `detail` como string (errores de negocio) o como
- * array de objetos (errores de validación 422). Este helper evita renderizar
- * el array directamente en JSX (lo que rompería React).
- */
 export function getErrorMessage(error, fallback = 'Ocurrió un error') {
   const detail = error?.response?.data?.detail
   if (typeof detail === 'string') return detail
