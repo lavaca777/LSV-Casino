@@ -181,3 +181,53 @@ def _get_session(db: Session, session_id: uuid.UUID) -> GameSession:
             status_code=status.HTTP_404_NOT_FOUND, detail="Session not found"
         )
     return session
+
+
+def get_session(db: Session, user_id: uuid.UUID, session_id: uuid.UUID) -> dict:
+    """Devuelve el estado de una sesión de blackjack.
+
+    Sirve para retomar una ronda tras recargar la página:
+    - Si la ronda sigue abierta (en memoria), devuelve la mano del jugador y
+      `turn="player"` para poder continuar con hit()/stand().
+    - Si ya terminó, devuelve el resultado, el payout y las manos finales
+      (leídas del `GameResult` guardado en la base de datos).
+    """
+    session = _get_session(db, session_id)
+    if session.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This session belongs to another user",
+        )
+
+    # Ronda aún abierta: está en memoria con su baraja y manos.
+    ronda = _rondas_activas.get(session_id)
+    if ronda is not None:
+        return {
+            "session_id": str(session.id),
+            "mano_jugador": [carta_a_dict(c) for c in ronda["mano_jugador"]],
+            "turn": "player",
+        }
+
+    if session.result is None:
+        # La ronda estaba abierta pero ya no está en memoria (p. ej. el backend
+        # se reinició): no es recuperable.
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Round is no longer available",
+        )
+
+    # Ronda terminada: los detalles están en el GameResult.
+    game_result = (
+        db.query(GameResult).filter(GameResult.session_id == session_id).first()
+    )
+    nuevo_balance = wallet_service.get_wallet(db, user_id).balance
+
+    return {
+        "session_id": str(session.id),
+        "mano_jugador": game_result.player_hand if game_result else [],
+        "manos_bots": game_result.bot_hands if game_result else [],
+        "turn": "done",
+        "resultado": session.result,
+        "payout": float(session.payout),
+        "nuevo_balance": float(nuevo_balance),
+    }
