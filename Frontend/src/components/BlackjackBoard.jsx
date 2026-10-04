@@ -60,18 +60,13 @@ function BlackjackBoard() {
 
   const enJuego = ronda?.turn === 'player'
   const terminada = ronda?.turn === 'done'
+  const manosBots = ronda?.manos_bots
 
   useEffect(() => {
-    if (!terminada || !ronda?.manos_bots) {
-      setRevealedBots(0)
-      setShowResult(false)
-      return undefined
-    }
+    if (!terminada || !manosBots) return undefined
 
-    setRevealedBots(0)
-    setShowResult(false)
     const timers = []
-    ronda.manos_bots.forEach((_, i) => {
+    manosBots.forEach((_, i) => {
       timers.push(
         setTimeout(
           () => setRevealedBots((n) => Math.max(n, i + 1)),
@@ -82,11 +77,11 @@ function BlackjackBoard() {
     timers.push(
       setTimeout(
         () => setShowResult(true),
-        REVEAL_START_MS + ronda.manos_bots.length * REVEAL_STEP_MS + RESULT_DELAY_MS
+        REVEAL_START_MS + manosBots.length * REVEAL_STEP_MS + RESULT_DELAY_MS
       )
     )
     return () => timers.forEach(clearTimeout)
-  }, [terminada, ronda?.resultado])
+  }, [terminada, manosBots])
 
   // Al montar: si quedó una ronda activa guardada (recarga de página),
   // se consulta su estado al backend y se retoma donde se dejó.
@@ -184,6 +179,8 @@ function BlackjackBoard() {
     localStorage.removeItem(SESSION_KEY)
     setRonda(null)
     setError(null)
+    setRevealedBots(0)
+    setShowResult(false)
   }
 
   const jugadorTotal = ronda ? handValue(ronda.mano_jugador) : 0
