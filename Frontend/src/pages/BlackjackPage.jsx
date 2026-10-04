@@ -8,8 +8,7 @@ function BlackjackPage() {
   return (
     <div className="home-page">
       <Navbar />
-      <main className="bj-main">
-        <h1>Blackjack</h1>
+      <main>
         <BlackjackBoard />
       </main>
       <Footer />
