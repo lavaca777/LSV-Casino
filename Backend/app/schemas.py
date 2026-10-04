@@ -188,3 +188,18 @@ class GameHistoryDetail(GameHistoryItem):
     player_hand: list
     bot_hands: list
     duration_seconds: float | None
+
+
+class StatsResponse(BaseModel):
+    """Estadísticas agregadas del jugador."""
+
+    total_games: int
+    total_games_won: int
+    total_games_lost: int
+    total_games_drawn: int
+    win_rate: float
+    current_streak: int
+    longest_streak: int
+    biggest_win: float
+    total_wagered: float
+    net_profit: float

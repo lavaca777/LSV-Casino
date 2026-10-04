@@ -3,7 +3,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
 import { WalletProvider } from './context/WalletContext'
-import ComingSoon from './pages/ComingSoon'
 import CoinflipPage from './pages/Coinflip'
 import BlackjackPage from './pages/BlackjackPage'
 import GameHistoryPage from './pages/GameHistory'
@@ -11,6 +10,7 @@ import HomePage from './pages/Home'
 import LoginPage from './pages/Login'
 import ProfilePage from './pages/Profile'
 import RegisterPage from './pages/Register'
+import StatsPage from './pages/Stats'
 import WalletPage from './pages/Wallet'
 
 function App() {
@@ -50,7 +50,7 @@ function App() {
               path="/stats"
               element={
                 <ProtectedRoute>
-                  <ComingSoon title="Estadísticas" />
+                  <StatsPage />
                 </ProtectedRoute>
               }
             />

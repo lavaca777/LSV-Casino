@@ -125,6 +125,13 @@ export const historyService = {
   },
 }
 
+export const statsService = {
+  async get(userId) {
+    const { data } = await api.get(`/users/${userId}/stats`)
+    return data
+  },
+}
+
 export function saveAuth(token, userId) {
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem(USER_ID_KEY, userId)
