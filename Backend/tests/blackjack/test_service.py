@@ -234,3 +234,65 @@ def test_stand_unknown_session_raises_404(db_user):
         bs.stand(db, user.id, uuid.uuid4())
     assert exc.value.status_code == 404
     
+
+# --- get_session ---------------------------------------------------------
+
+def test_get_session_ronda_abierta(db_user):
+    db, user = db_user
+    _set_balance(db, user.id, Decimal("100"))
+    baraja = BarajaFija([C("5"), C("4"), C("10"), C("7"), C("9"), C("8")])
+    inicio = bs.start_round(db, user.id, Decimal("10"), baraja=baraja)
+    session_id = uuid.UUID(inicio["session_id"])
+
+    estado = bs.get_session(db, user.id, session_id)
+    assert estado["turn"] == "player"
+    assert len(estado["mano_jugador"]) == 2
+    assert estado["session_id"] == str(session_id)
+
+
+def test_get_session_ronda_terminada(db_user):
+    db, user = db_user
+    _set_balance(db, user.id, Decimal("100"))
+    baraja = BarajaFija([C("10"), C("9"), C("10"), C("7"), C("9"), C("8")])
+    inicio = bs.start_round(db, user.id, Decimal("10"), baraja=baraja)
+    session_id = uuid.UUID(inicio["session_id"])
+    bs.stand(db, user.id, session_id)
+
+    estado = bs.get_session(db, user.id, session_id)
+    assert estado["turn"] == "done"
+    assert estado["resultado"] == "win"
+    assert estado["payout"] == 20.0
+    assert len(estado["manos_bots"]) == 2
+    assert estado["nuevo_balance"] == 110.0
+
+
+def test_get_session_inexistente_404(db_user):
+    db, user = db_user
+    with pytest.raises(Exception) as exc:
+        bs.get_session(db, user.id, uuid.uuid4())
+    assert exc.value.status_code == 404
+
+
+def test_get_session_otro_usuario_403(db_user):
+    db, user = db_user
+    _set_balance(db, user.id, Decimal("100"))
+    baraja = BarajaFija([C("5"), C("4"), C("10"), C("7"), C("9"), C("8")])
+    inicio = bs.start_round(db, user.id, Decimal("10"), baraja=baraja)
+    with pytest.raises(Exception) as exc:
+        bs.get_session(db, uuid.uuid4(), uuid.UUID(inicio["session_id"]))
+    assert exc.value.status_code == 403
+
+
+def test_get_session_ronda_perdida_404(db_user):
+    """Si el backend se reinicia, la ronda abierta se pierde (memoria) pero la
+    sesión sigue en la BD sin resultado: no es recuperable."""
+    db, user = db_user
+    _set_balance(db, user.id, Decimal("100"))
+    baraja = BarajaFija([C("5"), C("4"), C("10"), C("7"), C("9"), C("8")])
+    inicio = bs.start_round(db, user.id, Decimal("10"), baraja=baraja)
+
+    bs._rondas_activas.clear()  # simula un reinicio del backend
+
+    with pytest.raises(Exception) as exc:
+        bs.get_session(db, user.id, uuid.UUID(inicio["session_id"]))
+    assert exc.value.status_code == 404

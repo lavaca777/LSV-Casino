@@ -6,6 +6,8 @@ import BotAvatar from './BotAvatar'
 import PlayingCard, { CardBack } from './PlayingCard'
 
 const MIN_BET = 5
+// Guardamos el id de la ronda activa para poder retomarla si se recarga la página.
+const SESSION_KEY = 'bj_active_session'
 
 const BOTS = [
   { id: 'bot-1', name: 'UNIT // 01', style: 'emoji' },
@@ -86,6 +88,31 @@ function BlackjackBoard() {
     return () => timers.forEach(clearTimeout)
   }, [terminada, ronda?.resultado])
 
+  // Al montar: si quedó una ronda activa guardada (recarga de página),
+  // se consulta su estado al backend y se retoma donde se dejó.
+  useEffect(() => {
+    const savedId = localStorage.getItem(SESSION_KEY)
+    if (!savedId) return
+
+    let cancelled = false
+    gameService
+      .getBlackjackSession(savedId)
+      .then((data) => {
+        if (cancelled) return
+        if (data.turn === 'player') {
+          setRonda(data)
+        } else {
+          localStorage.removeItem(SESSION_KEY)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) localStorage.removeItem(SESSION_KEY)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const handleStart = async (e) => {
     e.preventDefault()
     setError(null)
@@ -100,6 +127,9 @@ function BlackjackBoard() {
     try {
       const data = await gameService.startBlackjack(amount)
       setRonda(data)
+      if (data.turn === 'player') {
+        localStorage.setItem(SESSION_KEY, data.session_id)
+      }
       await refresh()
     } catch (err) {
       setError(getErrorMessage(err, 'No se pudo iniciar la ronda'))
@@ -119,7 +149,10 @@ function BlackjackBoard() {
         ...data,
         session_id: data.session_id ?? prev.session_id,
       }))
-      if (data.turn === 'done') await refresh()
+      if (data.turn === 'done') {
+        localStorage.removeItem(SESSION_KEY)
+        await refresh()
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'No se pudo pedir carta'))
     } finally {
@@ -138,6 +171,7 @@ function BlackjackBoard() {
         ...data,
         session_id: data.session_id ?? prev.session_id,
       }))
+      localStorage.removeItem(SESSION_KEY)
       await refresh()
     } catch (err) {
       setError(getErrorMessage(err, 'No se pudo plantar'))
@@ -147,6 +181,7 @@ function BlackjackBoard() {
   }
 
   const handleNuevaRonda = () => {
+    localStorage.removeItem(SESSION_KEY)
     setRonda(null)
     setError(null)
   }

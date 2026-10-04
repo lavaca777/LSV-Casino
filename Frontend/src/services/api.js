@@ -104,6 +104,11 @@ export const gameService = {
     const { data } = await api.post(`/games/blackjack/${sessionId}/stand`)
     return data
   },
+
+  async getBlackjackSession(sessionId) {
+    const { data } = await api.get(`/games/blackjack/${sessionId}`)
+    return data
+  },
 }
 
 export function saveAuth(token, userId) {

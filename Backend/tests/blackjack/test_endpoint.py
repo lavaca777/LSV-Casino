@@ -148,3 +148,66 @@ def test_flujo_completo_start_y_stand(client):
     # el balance final es consistente con el resultado
     resp = client.get(f"/users/{user_id}/wallet", headers=headers)
     assert resp.json()["balance"] == resultado["nuevo_balance"]
+
+
+def test_get_session_requiere_auth(client):
+    user_id, headers = _register_and_login(client)
+    set_balance(user_id, 100)
+    session_id = _start(client, headers).json()["session_id"]
+    resp = client.get(f"/games/blackjack/{session_id}")
+    assert resp.status_code == 401
+
+
+def test_get_session_inexistente_404(client):
+    _, headers = _register_and_login(client)
+    fake_id = "00000000-0000-0000-0000-000000000000"
+    resp = client.get(f"/games/blackjack/{fake_id}", headers=headers)
+    assert resp.status_code == 404
+
+
+def test_get_session_ronda_abierta(client):
+    user_id, headers = _register_and_login(client)
+    set_balance(user_id, 100)
+    inicio = _start(client, headers).json()
+
+    resp = client.get(
+        f"/games/blackjack/{inicio['session_id']}", headers=headers
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["session_id"] == inicio["session_id"]
+    assert data["turn"] in ("player", "done")
+
+
+def test_get_session_ronda_terminada(client):
+    user_id, headers = _register_and_login(client)
+    set_balance(user_id, 100)
+    inicio = _start(client, headers, bet=10).json()
+
+    if inicio["turn"] == "player":
+        client.post(
+            f"/games/blackjack/{inicio['session_id']}/stand", headers=headers
+        )
+
+    resp = client.get(
+        f"/games/blackjack/{inicio['session_id']}", headers=headers
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["turn"] == "done"
+    assert data["resultado"] in ("win", "draw", "loss")
+    assert data["nuevo_balance"] is not None
+
+
+def test_get_session_de_otro_usuario_403(client):
+    user_id, headers = _register_and_login(client)
+    set_balance(user_id, 100)
+    inicio = _start(client, headers).json()
+
+    resp_otro = register_user(client, email="otro3@example.com", username="otro3")
+    otro_headers = {"Authorization": f"Bearer {resp_otro.json()['access_token']}"}
+
+    resp = client.get(
+        f"/games/blackjack/{inicio['session_id']}", headers=otro_headers
+    )
+    assert resp.status_code == 403

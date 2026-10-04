@@ -90,3 +90,20 @@ def stand_blackjack(
 ) -> dict:
     """El jugador se planta: se resuelve el resultado final."""
     return blackjack_service.stand(db, current_user.id, session_id)
+
+
+@router.get(
+    "/blackjack/{session_id}",
+    response_model=BlackjackPlayResponse,
+    response_model_exclude_none=True,
+)
+def get_blackjack_session(
+    session_id: UUID,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    """Consulta el estado de una sesión (ronda abierta o terminada).
+
+    Útil para retomar una ronda tras recargar la página.
+    """
+    return blackjack_service.get_session(db, current_user.id, session_id)
