@@ -1,0 +1,8 @@
+.env
+LSV/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+tests/
