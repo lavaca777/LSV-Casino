@@ -163,3 +163,28 @@ class BlackjackPlayResponse(BaseModel):
     resultado: str | None = None
     payout: float | None = None
     nuevo_balance: float | None = None
+
+
+class GameHistoryItem(BaseModel):
+    """Una partida en el listado de historial."""
+
+    id: uuid.UUID
+    game_name: str
+    date: datetime
+    bet: float
+    result: str | None
+    payout: float
+    balance_after: float
+
+
+class GameHistoryList(BaseModel):
+    total: int
+    games: list[GameHistoryItem]
+
+
+class GameHistoryDetail(GameHistoryItem):
+    """Detalle de una partida (incluye las manos jugadas)."""
+
+    player_hand: list
+    bot_hands: list
+    duration_seconds: float | None

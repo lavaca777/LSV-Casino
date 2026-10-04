@@ -123,9 +123,11 @@ def _finalizar(
     if payout > 0:
         wallet_service.update_balance(db, user_id, payout)
 
+    nuevo_balance = wallet_service.get_wallet(db, user_id).balance
     session.ended_at = datetime.now(timezone.utc)
     session.result = resultado
     session.payout = payout
+    session.balance_after = nuevo_balance
     db.add(
         GameResult(
             session_id=session.id,
@@ -138,7 +140,6 @@ def _finalizar(
 
     _rondas_activas.pop(session.id, None)
 
-    nuevo_balance = wallet_service.get_wallet(db, user_id).balance
     return {
         "session_id": str(session.id),
         "mano_jugador": [carta_a_dict(c) for c in mano_jugador],

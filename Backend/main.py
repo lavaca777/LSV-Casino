@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import SessionLocal, init_db
-from app.routers import auth, games, users, wallet
+from app.routers import auth, games, history, users, wallet
 from app.utils.seed import seed_games
 
 
@@ -37,6 +37,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(wallet.router)
 app.include_router(games.router)
+app.include_router(history.router)
 
 
 @app.get("/")

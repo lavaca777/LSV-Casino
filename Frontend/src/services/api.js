@@ -111,6 +111,20 @@ export const gameService = {
   },
 }
 
+export const historyService = {
+  async list(userId, { limit = 20, offset = 0, game } = {}) {
+    const params = { limit, offset }
+    if (game) params.game = game
+    const { data } = await api.get(`/users/${userId}/games`, { params })
+    return data
+  },
+
+  async detail(userId, sessionId) {
+    const { data } = await api.get(`/users/${userId}/games/${sessionId}`)
+    return data
+  },
+}
+
 export function saveAuth(token, userId) {
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem(USER_ID_KEY, userId)

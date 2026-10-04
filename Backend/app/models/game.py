@@ -51,6 +51,9 @@ class GameSession(Base):
     payout: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), nullable=False, default=Decimal("0")
     )
+    balance_after: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("0")
+    )
 
 
 class GameResult(Base):

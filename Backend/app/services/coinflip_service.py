@@ -47,6 +47,8 @@ def play_coinflip(
     if payout > 0:
         wallet_service.update_balance(db, user_id, payout)
 
+    nuevo_balance = wallet_service.get_wallet(db, user_id).balance
+
     # 4. Registrar la sesión y el detalle de la partida.
     #    (para coinflip guardamos la elección y el resultado del lanzamiento)
     session = GameSession(
@@ -56,6 +58,7 @@ def play_coinflip(
         ended_at=datetime.now(timezone.utc),
         result=resultado["resultado"],
         payout=payout,
+        balance_after=nuevo_balance,
     )
     db.add(session)
     db.flush()
@@ -69,7 +72,6 @@ def play_coinflip(
     )
     db.commit()
 
-    nuevo_balance = wallet_service.get_wallet(db, user_id).balance
     return {
         "resultado": resultado["resultado"],
         "eleccion": resultado["eleccion"],
