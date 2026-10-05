@@ -1,336 +1,263 @@
-# 📊 Especificación del Proyecto: Casino Virtual - Blackjack Edition
+# 🎰 Casino Virtual — Blackjack Edition
 
-**Versión:** 1.0  
-**Fecha:** Agosto 2026  
-**Estado:** Listo para desarrollo  
-**Audiencia:** Equipo de desarrollo + Profesor
+Casino virtual **ficticio** donde se juega con dinero simulado (sin pagos ni dinero real).
+Proyecto modular pensado para agregar más juegos sin cambiar la arquitectura base.
+
+**Estado:** implementado · **Fecha:** Octubre 2026
 
 ---
 
-## 1. Resumen Ejecutivo
+## 1. Resumen
 
-Desarrollo de un **casino virtual ficticio** donde los usuarios pueden jugar blackjack sin dinero real. El sistema está diseñado para ser **modular y escalable**, permitiendo agregar más juegos en el futuro sin modificar la arquitectura base.
+- **Con login**: cuenta persistente con saldo, préstamos, historial y estadísticas.
+- **Juegos**: **Blackjack** (principal) y **Cara o Cruz** (juego extra que valida la modularidad del motor).
 
-### Diferenciador principal
-- **Sin login** *(diferido al final del proyecto)*: Dinero ilimitado, juego para probar, sin persistencia
-- **Con login**: Sistema de préstamos de $20, registro permanente con historial completo
+El foco principal es el **backend**; el frontend es secundario y se optimiza para desktop.
 
 ---
 
 ## 2. Stack Tecnológico
 
 | Componente | Tecnología | Versión |
-|-----------|-----------|---------|
-| Backend | FastAPI | Python 3.9+ |
-| Frontend | React | 18+ |
-| Base de datos | PostgreSQL | 13+ |
-| API | REST | HTTP/HTTPS |
-| Autenticación | JWT | Bearer tokens |
-
-**Nota:** El foco principal es el **BACKEND**. Frontend es secundario y se optimiza para desktop.
+|---|---|---|
+| Backend | FastAPI (Python) | FastAPI 0.141 · Python 3.13 |
+| Frontend | React + Vite | React 19 · Vite 8 |
+| Base de datos | PostgreSQL | 13 (contenedor Docker) |
+| ORM | SQLAlchemy | 2.0 |
+| Validación | Pydantic | 2.x |
+| Autenticación | JWT (PyJWT) + bcrypt | PyJWT 2.13 · bcrypt 5.0 |
+| Router (frontend) | React Router | 7.x |
+| HTTP (frontend) | Axios | 1.x |
+| Tests | pytest | 9.x |
 
 ---
 
 ## 3. Arquitectura General
 
+**Monolito** backend (FastAPI) + **SPA** frontend (React), con PostgreSQL.
+
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   CLIENTE (React)                   │
-│  ┌──────────────────────────────────────────────┐  │
-│  │ Página principal (juegos)                    │  │
-│  │ Juego (Blackjack)                            │  │
-│  │ Perfil de usuario                            │  │
-│  │ Historial de partidas                        │  │
-│  │ Estadísticas                                 │  │
-│  └──────────────────────────────────────────────┘  │
+│                   CLIENTE (React SPA)               │
+│   Lobby · Blackjack · Cara o Cruz · Perfil          │
+│   Billetera · Historial · Estadísticas              │
 └──────────────────┬──────────────────────────────────┘
-                   │ REST API
+                   │ REST API (JSON) + JWT Bearer
                    ▼
 ┌─────────────────────────────────────────────────────┐
-│              SERVIDOR (FastAPI)                     │
-│  ┌──────────────────────────────────────────────┐  │
-│  │ ├─ Auth Service (JWT)                        │  │
-│  │ ├─ User Service                              │  │
-│  │ ├─ Game Engine (módulo)                      │  │
-│  │ │  └─ Blackjack                              │  │
-│  │ ├─ Wallet Service (préstamos, retiros)       │  │
-│  │ ├─ Stats Service                             │  │
-│  │ └─ Logging (esencial)                        │  │
-│  └──────────────────────────────────────────────┘  │
+│              SERVIDOR (FastAPI - monolito)          │
+│   routers/  → rutas HTTP (delegan)                  │
+│   services/ → lógica de negocio                     │
+│   games/    → motor de juegos modular (BaseGame)    │
+│   models/   → tablas (SQLAlchemy)                   │
+│   schemas   → validación (Pydantic)                 │
+│   utils/    → seguridad (JWT/bcrypt), rate limit    │
 └──────────────────┬──────────────────────────────────┘
-                   │ SQL
+                   │ SQL (SQLAlchemy)
                    ▼
 ┌─────────────────────────────────────────────────────┐
 │            BASE DE DATOS (PostgreSQL)               │
-│  ├─ users                                           │
-│  ├─ wallets                                         │
-│  ├─ loans                                           │
-│  ├─ games                                           │
-│  ├─ game_sessions                                   │
-│  ├─ game_results                                    │
-│  └─ withdrawals                                     │
+│   users · wallets · loans · withdrawals             │
+│   games · game_sessions · game_results              │
 └─────────────────────────────────────────────────────┘
 ```
+
+**Capas del backend (patrón Service + Router):**
+- `routers/`: definen las rutas HTTP; **no** contienen lógica de negocio.
+- `services/`: lógica de negocio.
+- `models/`: tablas de la BD.
+- `schemas.py`: validación de entrada/salida (Pydantic).
+- `games/`: motor de juegos modular.
+- `utils/`: seguridad, rate limiting y seed del catálogo.
 
 ---
 
 ## 4. Módulos Principales
 
-### 4.1 Auth Service
-- Registro / Login
-- Validación de credenciales
-- Rate limiting: 5 intentos fallidos por minuto
-- Hashing seguro de contraseñas (bcrypt)
-- Autenticación JWT con bearer tokens
+### 4.1 Auth / Usuarios
+- Registro y login (email/username + contraseña).
+- Hashing con **bcrypt**; autenticación **JWT** (bearer token, expira en 24 h).
+- **Rate limiting**: máx. 5 intentos fallidos por minuto.
+- Perfil: ver/actualizar datos y cambiar contraseña.
+- Logout *stateless* (el cliente descarta el token).
 
-### 4.2 User Service
-- CRUD de perfil
-- Datos personales (nombre, usuario, email, fecha creación)
-- Cambio de contraseña
+### 4.2 Wallet
+- Saldo y `total_wagered` por usuario (se crea al registrarse).
+- **Préstamos de $20** (solo si el saldo es **menor a $5**).
+- **Retiros ficticios**: se aprueban automáticamente y **descuentan el saldo** (no puede superar el saldo).
+- Validación de apuestas: mínimo **$5**, máximo el saldo disponible.
 
-### 4.3 Game Engine (Modular)
-**Estructura base para juegos:**
+### 4.3 Motor de Juegos (modular)
 ```
 games/
-├─ __init__.py
-├─ base.py (clase abstracta)
-├─ blackjack.py
-└─ [otros juegos aquí]
+├─ base.py               # clase abstracta BaseGame
+├─ blackjack/            # cartas.py · blackjack.py · game.py
+└─ coinflip/             # game.py
 ```
-
-**Cada juego hereda de `BaseGame`** y expone:
-- `play(user_id, bet)` → devuelve resultado
+Cada juego hereda de **`BaseGame`** y expone:
+- `play(user_id, bet, **opciones)` → resultado de la partida
 - `get_rules()` → reglas del juego
 - `get_house_edge()` → ventaja de la casa
 
-### 4.4 Wallet Service
-- Gestión de dinero de usuario
-- Sistema de préstamos de $20 (sin límite diario por ahora; los límites quedan como opcional al final)
-- Validación de apuestas mínimas/máximas
-- Registro de retiros (solo lógica, no dinero real)
+Los juegos disponibles se registran en la tabla **`games`** mediante un *seed* al arrancar el servidor.
 
-### 4.5 Stats Service
-- Cálculo de estadísticas en tiempo real
+### 4.4 Historial
+- Listado paginado de las partidas del usuario (más recientes primero), con filtro por juego.
+- Detalle de cada partida (manos jugadas, duración, payout, balance posterior).
 
-### 4.6 Logging
-- Logs de errores críticos
-- Logs de transacciones de dinero
-- Logs de partidas (inicio/final)
+### 4.5 Estadísticas
+- Total de partidas, ganadas/perdidas/empates y tasa de victoria.
+- Racha actual y racha más larga (los **empates no cortan** la racha).
+- Mayor ganancia, total apostado y **profit/loss**.
 
 ---
 
-## 5. Flujo de Usuario
+## 5. API REST
 
-### 5.1 Usuario SIN LOGIN *(diferido al final del proyecto)*
-1. Entra a la página principal
-2. Ve grid de juegos
-3. Hace clic en Blackjack
-4. Juega con dinero ilimitado (simulado)
-5. Cierra el navegador → se pierde todo (sin persistencia)
+Base: `http://localhost:8000` · Documentación interactiva: **`/docs`**
 
-### 5.2 Usuario CON LOGIN
-1. **Registro**: Crea cuenta (email, username, contraseña)
-2. **Login**: Entra con credenciales
-3. **Dashboard**: Ve saldo actual, botón de préstamo visible
-4. **Pedir préstamo**: Puede pedir préstamos de $20 (sin límite diario por ahora)
-5. **Juega**: Apuesta entre $5 y su saldo disponible
-6. **Historial**: Todas las partidas se registran con resultado y balance
-7. **Perfil**: Ve sus datos, puede cambiar contraseña
-8. **Estadísticas**: Ve sus stats de juego
+| Área | Método y ruta |
+|---|---|
+| Auth | `POST /auth/register` · `POST /auth/login` · `POST /auth/logout` |
+| Usuarios | `GET /users/{id}` · `PUT /users/{id}` · `PUT /users/{id}/password` |
+| Wallet | `GET /users/{id}/wallet` · `POST /users/{id}/loans/request` · `GET /users/{id}/loans/history` |
+| Retiros | `POST /users/{id}/withdrawals/request` · `GET /users/{id}/withdrawals` |
+| Juegos | `GET /games` · `POST /games/coinflip/play` |
+| Blackjack | `POST /games/blackjack/start` · `POST /games/blackjack/{id}/hit` · `POST /games/blackjack/{id}/stand` · `GET /games/blackjack/{id}` |
+| Historial | `GET /users/{id}/games` · `GET /users/{id}/games/{session_id}` |
+| Estadísticas | `GET /users/{id}/stats` |
+| Sistema | `GET /` · `GET /health` |
 
----
-
-## 6. Juego Principal: Blackjack
-
-### 6.1 Mecánica Básica
-- **Oponentes:** 2 bots, juegan en secuencia (uno tras otro)
-- **Reglas:** Blackjack estándar
-- **Apuesta mínima:** $5
-- **Apuesta máxima:** Saldo disponible del usuario
-
-### 6.2 Acciones del Jugador
-- Hit (pedir carta)
-- Stand (plantarse)
-
-### 6.3 Bots
-- 2 bots con comportamiento simple (hit si < 17, stand si >= 17)
-- Juegan en secuencia (primero bot 1, luego bot 2, luego jugador)
-
-### 6.4 Resultado de Partida
-- **Victoria:** Jugador > Bots o Bots quiebran
-- **Derrota:** Jugador se pasa de 21 o < todos los bots
-- **Empate:** Jugador = Bot
+**Autenticación:** los endpoints protegidos requieren `Authorization: Bearer <token>`. El dueño solo puede acceder a sus propios recursos (403 si no).
 
 ---
 
-## 7. Base de Datos
+## 6. Juegos
 
-### 7.1 Tablas Principales
+### 6.1 Blackjack
+- El jugador compite contra **2 bots**.
+- Acciones: **Hit** (pedir) y **Stand** (plantarse).
+- Valor de mano con **ases flexibles** (11 o 1); los bots piden si su mano es < 17.
+- Resultado: `win` / `loss` / `draw` según la mejor mano.
+- Rondas de varios pasos: se pueden **retomar tras recargar** la página.
+- **Payout:** win = apuesta × 2 · draw = apuesta · loss = 0.
 
-#### users
-```sql
-id (PK)
-username (UNIQUE, NOT NULL)
-email (UNIQUE, NOT NULL)
-password_hash (NOT NULL)
-created_at
-updated_at
-```
+### 6.2 Cara o Cruz
+- El jugador elige cara/cruz; se lanza la moneda; si acierta, gana.
+- Sirve para demostrar que **agregar un juego es simple** (una clase `BaseGame` + seed).
 
-#### wallets
-```sql
-id (PK)
-user_id (FK → users)
-balance (DECIMAL, default 0)
-total_wagered (DECIMAL, para estadísticas)
-updated_at
-```
-
-#### loans
-```sql
-id (PK)
-user_id (FK → users)
-amount (DECIMAL, default 20)
-requested_at
-```
-
-#### games
-```sql
-id (PK)
-name (VARCHAR: "blackjack", etc.)
-min_bet (DECIMAL)
-max_bet (DECIMAL)
-house_edge (DECIMAL, para referencia)
-created_at
-```
-
-#### game_sessions
-```sql
-id (PK)
-user_id (FK → users, nullable si es sin login — *diferido al final*)
-game_id (FK → games)
-bet (DECIMAL)
-started_at
-ended_at
-result (ENUM: win, loss, draw)
-payout (DECIMAL)
-session_token (para usuarios sin login — *diferido al final*)
-```
-
-#### game_results
-```sql
-id (PK)
-session_id (FK → game_sessions)
-result_type (ENUM: win, loss, draw)
-player_hand (JSON o TEXT)
-bot_hands (JSON o TEXT)
-```
-
-#### withdrawals
-```sql
-id (PK)
-user_id (FK → users)
-amount (DECIMAL)
-requested_at
-status (ENUM: pending, approved, rejected)
-```
+### 6.3 Flujo de dinero (común)
+1. Se valida la apuesta (mín. $5, máx. = saldo).
+2. Se descuenta la apuesta del saldo.
+3. Se paga el **payout** según el resultado.
+4. Se registra la partida (`game_sessions` + `game_results`) con el **balance posterior**.
 
 ---
 
-## 8. Features de Usuario
+## 7. Flujo de Usuario
 
-### 8.1 Página Principal
-- Grid de juegos (cuadrados con nombre, miniatura)
-- Saldo visible y destacado en esquina superior derecha
-- Botón "Pedir préstamo" (solo usuarios logueados)
-- Opción de perfil/usuario (desplegable)
-
-### 8.2 Gestión de Cuenta
-- Datos personales: nombre, usuario, email, fecha creación
-- Cambiar contraseña
-- Ver historial de transacciones (préstamos)
-
-### 8.3 Billetera Virtual
-- Registro histórico de retiros solicitados
-- Muestra dinero retirado (no dinero actual)
-
-### 8.4 Historial de Partidas
-- Tabla: Juego | Fecha | Resultado (V/D/P) | Apuesta | Payout | Balance
-- Balance acumulado
-
-### 8.5 Estadísticas
-- Total de partidas jugadas
-- Tasa de victoria (%)
-- Racha actual de victorias
-- Racha más larga histórica
-- Mayor ganancia en una sola mano
-- Fichas totales apostadas en la historia
+### Usuario con login
+1. **Registro**: email, username y contraseña.
+2. **Login**: entra y recibe un JWT.
+3. **Lobby**: ve el saldo y el grid de juegos.
+4. **Pedir préstamo**: $20 (solo si el saldo es menor a $5).
+5. **Jugar**: apuesta entre $5 y su saldo (Blackjack o Cara o Cruz).
+6. **Billetera**: préstamos, retiros (descuentan saldo) e historial.
+7. **Historial**: partidas con filtro y detalle.
+8. **Perfil**: datos y cambio de contraseña.
+9. **Estadísticas**: win rate, rachas, ganancias, profit/loss.
 
 ---
 
-## 9. Requisitos Funcionales
+## 8. Base de Datos
 
-### 9.1 Autenticación & Seguridad
-- [ ] Registro con email, username, contraseña
-- [ ] Login con validación
-- [ ] Rate limiting: 5 intentos fallidos/minuto
-- [ ] Hashing seguro de contraseñas (bcrypt)
-- [ ] Validaciones en backend
-- [ ] Autenticación JWT con bearer tokens
+**7 tablas** (PostgreSQL):
 
-### 9.2 Juego
-- [ ] Lógica de Blackjack (hit, stand, evaluación de mano)
-- [ ] Bots funcionando en secuencia
-- [ ] Cálculo correcto de ganador
-- [ ] Actualización de saldo tras partida
-- [ ] Registro de partida en BD
+| Tabla | Campos principales |
+|---|---|
+| `users` | id (UUID), username (único), email (único), password_hash, created_at, updated_at |
+| `wallets` | id, user_id (FK), balance, total_wagered, updated_at |
+| `loans` | id, user_id (FK), amount, requested_at |
+| `withdrawals` | id, user_id (FK), amount, requested_at, status |
+| `games` | id, name (único), min_bet, max_bet, house_edge, created_at |
+| `game_sessions` | id, user_id (FK), game_id (FK), bet, started_at, ended_at, result, payout, **balance_after** |
+| `game_results` | id, session_id (FK), result_type, player_hand (JSONB), bot_hands (JSONB) |
 
-### 9.3 Wallet & Dinero
-- [ ] Crear wallet al registrarse
-- [ ] Lógica de préstamos de $20 (sin límite diario por ahora)
-- [ ] Validación de apuesta (min $5, max saldo)
-- [ ] Actualización de balance tras cada partida
-- [ ] Registro de retiros (sin procesar dinero)
-
-### 9.4 Estadísticas
-- [ ] Generar estadísticas en tiempo real
-- [ ] Histórico de partidas accesible
-
-### 9.5 UI/UX
-- [ ] Página principal con grid de juegos
-- [ ] Saldo visible y destacado
-- [ ] Modal/página de juego funcional
-- [ ] Perfil de usuario
-- [ ] Historial de partidas
-- [ ] Estadísticas
-- [ ] Interfaz desktop
+Las tablas se crean automáticamente al arrancar el backend (con una mini-migración idempotente para columnas nuevas).
 
 ---
 
-## 10. Requisitos No Funcionales
+## 9. Features de Usuario
 
-- **Rendimiento:** Las consultas deben < 200ms
-- **Disponibilidad:** Deploy en servidor estable
-- **Seguridad:** Validaciones en backend, sin inyecciones SQL
-- **Escalabilidad:** Modular para agregar juegos
-- **Logging:** Logs de errores y transacciones financieras
-- **Documentación:** Comentarios en código, README en repo
+- **Lobby**: grid de juegos, saldo destacado, menú de usuario (Perfil, Historial, Estadísticas, Billetera, Salir) y botón "Pedir préstamo" (visible si el saldo es bajo).
+- **Cuenta**: datos personales (usuario, email, fecha de creación) y cambio de contraseña.
+- **Billetera**: saldo, formulario de retiro e historial de préstamos/retiros.
+- **Historial**: tabla (Juego · Fecha · Resultado · Apuesta · Payout · Balance), paginación, filtro por juego y detalle en modal.
+- **Estadísticas**: tarjetas con total de partidas, tasa de victoria, rachas, mayor ganancia, total apostado y profit/loss.
 
 ---
 
-## 11. Instalación y Ejecución
+## 10. Requisitos Funcionales
 
-### 11.1 Prerrequisitos
+### Autenticación & Seguridad
+- [x] Registro con email, username y contraseña
+- [x] Login con validación
+- [x] Rate limiting: 5 intentos fallidos/minuto
+- [x] Hashing seguro de contraseñas (bcrypt)
+- [x] Validaciones en backend
+- [x] Autenticación JWT con bearer tokens
+
+### Juego
+- [x] Lógica de Blackjack (hit, stand, evaluación de mano)
+- [x] Bots funcionando (2)
+- [x] Cálculo correcto del ganador
+- [x] Actualización de saldo tras la partida
+- [x] Registro de la partida en la BD
+- [x] Juego extra (Cara o Cruz) para validar la modularidad
+
+### Wallet & Dinero
+- [x] Crear wallet al registrarse
+- [x] Préstamos de $20 (solo si el saldo es < $5)
+- [x] Validación de apuesta (mín. $5, máx. saldo)
+- [x] Actualización de balance tras cada partida
+- [x] Registro de retiros (descuentan el saldo ficticio)
+
+### Historial & Estadísticas
+- [x] Historial paginado y con filtro por juego
+- [x] Detalle de partida (manos jugadas)
+- [x] Estadísticas en tiempo real (win rate, rachas, ganancias, profit/loss)
+
+### UI/UX
+- [x] Página principal con grid de juegos
+- [x] Saldo visible y destacado
+- [x] Página de juego funcional (Blackjack / Cara o Cruz)
+- [x] Perfil de usuario
+- [x] Historial de partidas
+- [x] Estadísticas
+- [x] Interfaz desktop
+
+---
+
+## 11. Requisitos No Funcionales
+
+- **Seguridad:** validaciones en backend, contraseñas con bcrypt, JWT.
+- **Escalabilidad:** motor de juegos modular (`BaseGame`).
+- **Rendimiento:** consultas eficientes (JOIN para evitar N+1).
+- **Documentación:** docstrings en el código y este README.
+
+---
+
+## 12. Instalación y Ejecución
+
+### 12.1 Prerrequisitos
 
 | Herramienta | Versión | Nota |
-|-------------|---------|------|
-| Docker + Docker Compose | cualquier reciente | Para la base de datos (PostgreSQL 13 en contenedor) |
+|---|---|---|
+| Docker + Docker Compose | reciente | Base de datos (PostgreSQL 13) |
 | Python | 3.9+ (probado con 3.13) | Backend |
-| Node.js + npm | cualquier reciente (probado con Vite 8) | Frontend |
+| Node.js + npm | reciente (probado con Vite 8) | Frontend |
 
-### 11.2 Base de datos (Docker)
-
-El proyecto incluye un `docker-compose.yml` con PostgreSQL 13. Para levantarla:
+### 12.2 Base de datos (Docker)
 
 ```bash
 docker compose up -d
@@ -339,11 +266,9 @@ docker compose up -d
 - Puerto: **5433** (evita conflicto con un PostgreSQL local en el 5432)
 - Usuario: `casino` · Contraseña: `casino_dev_password` · Base: `casino_db`
 
-Las tablas se crean automáticamente al arrancar el backend (no hace falta SQL manual).
+Las tablas se crean automáticamente al arrancar el backend.
 
-### 11.3 Configuración de variables de entorno
-
-Copia las plantillas a los archivos reales y ajusta si es necesario:
+### 12.3 Variables de entorno
 
 ```bash
 # Backend
@@ -352,10 +277,10 @@ cp Backend/.env.example Backend/.env
 cp Frontend/.env.example Frontend/.env
 ```
 
-- `Backend/.env` → `DATABASE_URL` (apunta a la BD del paso 11.2) y `SECRET_KEY` (firma de JWT).
-- `Frontend/.env` → `VITE_API_URL=http://localhost:8000` (URL del backend).
+- `Backend/.env` → `DATABASE_URL` y `SECRET_KEY` (firma de JWT).
+- `Frontend/.env` → `VITE_API_URL=http://localhost:8000`.
 
-### 11.4 Backend (FastAPI)
+### 12.4 Backend (FastAPI)
 
 ```bash
 cd Backend
@@ -365,10 +290,9 @@ python -m pip install -r requirements.txt
 python -m uvicorn main:app --reload
 ```
 
-El servidor queda en `http://localhost:8000`. Documentación interactiva de la API en
-`http://localhost:8000/docs`.
+Servidor en `http://localhost:8000` · Documentación en `http://localhost:8000/docs`.
 
-### 11.5 Frontend (React + Vite)
+### 12.5 Frontend (React + Vite)
 
 ```bash
 cd Frontend
@@ -376,21 +300,21 @@ npm install
 npm run dev
 ```
 
-El servidor de desarrollo queda en `http://localhost:5173`.
+Servidor de desarrollo en `http://localhost:5173`.
 
-### 11.6 Tests
+### 12.6 Tests
 
 ```bash
-# Tests backend (desde la raíz del repo, requiere BD corriendo)
+# Desde la raíz del repo (requiere la BD corriendo)
 Backend/LSV/Scripts/python.exe -m pytest Backend/tests -v
 ```
 
-Los tests de backend usan la base real de desarrollo y la vacían entre pruebas.
+Actualmente hay **154 tests** que pasan. Usan la base real de desarrollo y la vacían entre pruebas.
 
-### 11.7 Comandos útiles
+### 12.7 Comandos útiles
 
 | Acción | Comando |
-|--------|---------|
+|---|---|
 | Levantar BD | `docker compose up -d` |
 | Detener BD | `docker compose down` |
 | Ver BD con pgAdmin | conectarse a `localhost:5433`, usuario `casino` |
