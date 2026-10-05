@@ -1,6 +1,7 @@
 .env
-LSV/
+.venv/
 venv/
+LSV/
 __pycache__/
 *.pyc
 .pytest_cache/
